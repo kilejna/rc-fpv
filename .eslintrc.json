@@ -1,7 +1,19 @@
 {
-	"extends": ["eslint:recommended"],
+	"parser": "@typescript-eslint/parser", // Use the TypeScript parser
+	"extends": [
+		"eslint:recommended",
+		"plugin:@typescript-eslint/recommended" // Use recommended rules from the @typescript-eslint/eslint-plugin
+	],
+	"parserOptions": {
+		"ecmaVersion": "latest", // Allows for the parsing of modern ECMAScript features
+		"sourceType": "module" // Allows for the use of imports
+	},
+	"env": {
+		"es6": true, // Enables ES6 global variables
+		"node": true // Node.js global variables and Node.js scoping
+	},
 	"rules": {
 		"no-unused-vars": [1, { "args": "after-used", "argsIgnorePattern": "^_" }]
 	},
-	"ignorePatterns": ["**/_old/"]
+	"ignorePatterns": ["**/_old/", "./server/dist/"]
 }

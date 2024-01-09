@@ -1,36 +1,33 @@
 {
-  "name": "rc-fpv",
-  "version": "1.0.0",
-  "description": "RC-FPV Root",
-  "private": "true",
-  "scripts": {
-    "install:client": "cd client && npm install",
-    "install:server": "cd server && npm install",
-    "build:client": "cd client && npm run build",
-    "build:server": "cd server && npm run build",
-    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
-    "start:server": "cd server && npm start",
-    "start:client": "cd client && npm start",
-    "test": "npm run test:server && npm run test:client",
-    "test:server": "cd server && npm test",
-    "test:client": "cd client && npm test",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
-    "prepare": "husky install"
-  },
-  "author": "Angelique Zylinski, Harry Madden",
-  "license": "ISC",
-  "devDependencies": {
-    "@commitlint/cli": "^18.4.4",
-    "@commitlint/config-conventional": "^18.4.4",
-    "@types/node": "^20.10.6",
-    "concurrently": "^8.2.2",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.1.2",
-    "husky": "^8.0.3",
-    "nodemon": "^3.0.2",
-    "prettier": "^3.1.1",
-    "typescript": "^5.3.3"
-  }
+	"name": "rc-fpv",
+	"version": "1.0.0",
+	"description": "RC-FPV Root",
+	"private": "true",
+	"scripts": {
+		"install:client": "cd client && npm install",
+		"install:server": "cd server && npm install",
+		"build:client": "cd client && npm run build",
+		"build:server": "cd server && npm run build",
+		"build:css": "cd client && npm run css",
+		"start:server": "cd server && npm start",
+		"lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+		"format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+		"prepare": "husky install"
+	},
+	"author": "Angelique Zylinski, Harry Madden",
+	"license": "ISC",
+	"devDependencies": {
+		"@commitlint/cli": "^18.4.4",
+		"@commitlint/config-conventional": "^18.4.4",
+		"@types/node": "^20.10.6",
+		"concurrently": "^8.2.2",
+		"eslint": "^8.56.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-prettier": "^5.1.2",
+		"husky": "^8.0.3",
+		"nodemon": "^3.0.2",
+		"prettier": "^3.1.1",
+		"prettier-plugin-tailwindcss": "^0.5.11",
+		"typescript": "^5.3.3"
+	}
 }
