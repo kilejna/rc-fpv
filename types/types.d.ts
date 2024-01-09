@@ -1,5 +1,14 @@
-export type Directions = 'forwards' | 'backwards' | 'left' | 'right'
-
 export type Keys = 'w' | 'a' | 's' | 'd'
 
-export type RelayObject = Record<Directions, { keys: Keys; toggle: boolean }>
+export type KeyMessage = {
+	key: Keys
+	toggle: boolean
+}
+
+export type PinNumbers = [number, number, number, number]
+
+export type ServerConfiguration = {
+	pinNumbers: PinNumbers
+	boardPort: string
+	serverPort: number
+}

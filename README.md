@@ -41,9 +41,14 @@ Support for gamepad controllers using the GamePad API will be added in the futur
 
 ## Installation
 
-1. Configure arduino port in ```server.ts```:
+1. Edit serverConfiguration in `server.ts`:
+
 ```ts
-const board = new Board({ port: /* your port */ })
+const serverConfiguration: ServerConfiguration = {
+	pinNumbers: [2, 3, 4, 5],
+	boardPort: '/dev/ttyACM0',
+	serverPort: 3000,
+}
 ```
 
 2. Install dependancies:
