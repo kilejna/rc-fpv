@@ -15,5 +15,5 @@
 	"rules": {
 		"no-unused-vars": [1, { "args": "after-used", "argsIgnorePattern": "^_" }]
 	},
-	"ignorePatterns": ["**/_old/", "./server/dist/"]
+	"ignorePatterns": ["**/_old/", "dist/"]
 }
