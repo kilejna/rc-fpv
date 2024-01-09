@@ -28,6 +28,9 @@ Support for gamepad controllers using the GamePad API will be added in the futur
 #### Client (Frontend)
 
 - socket.io-client
+- tailwindcss
+- autoprefixer
+- postcss
 
 #### Server (Backend)
 
@@ -38,7 +41,32 @@ Support for gamepad controllers using the GamePad API will be added in the futur
 
 ## Installation
 
-TBA...
+1. Configure arduino port in ```server.ts```:
+```ts
+const board = new Board({ port: /* your port */ })
+```
+
+2. Install dependancies:
+
+```bash
+npm i
+npm run install:server
+npm run install:client
+```
+
+3. Build project:
+
+```bash
+npm run build:server
+npm run build:client
+npm run build:css
+```
+
+4. Run server:
+
+```bash
+npm run start:server
+```
 
 ## License
 
