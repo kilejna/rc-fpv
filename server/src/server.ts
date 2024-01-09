@@ -1,3 +1,4 @@
+import { KeyMessage, PinNumbers, ServerConfiguration } from '@types'
 import express from 'express'
 import { Server as HTTPServer } from 'http'
 import pkg from 'johnny-five'
@@ -5,48 +6,80 @@ import path from 'path'
 import { Server as SocketIOServer } from 'socket.io'
 import { fileURLToPath } from 'url'
 
-const { Board, Relay } = pkg
+const { Board, Pin } = pkg
 
-export type Keys = 'w' | 'a' | 's' | 'd'
+type Pins = {
+	w: pkg.Pin
+	a: pkg.Pin
+	s: pkg.Pin
+	d: pkg.Pin
+}
 
-export const initRelay = (pin: number) => new Relay(pin)
+const serverConfiguration: ServerConfiguration = {
+	pinNumbers: [2, 3, 4, 5],
+	boardPort: '/dev/ttyACM0',
+	serverPort: 3000,
+}
 
-export const initRelays = (pins: number[]) => pins.map((pin) => initRelay(pin))
+const { pinNumbers, boardPort, serverPort } = serverConfiguration
 
-const app = express()
-const httpServer: HTTPServer = new HTTPServer(app)
-const io = new SocketIOServer(httpServer)
-const board = new Board({ port: '/dev/ttyACM0' })
+const initPin = (pin: number) => new Pin(pin)
 
-board.on('ready', () => {
-	console.log(`${board.id} ready: ${board.isReady}`)
-
-	const relays = {
-		w: initRelay(2),
-		s: initRelay(3),
-		a: initRelay(4),
-		d: initRelay(5),
+const initPins = (pinNum: PinNumbers) => {
+	const pins = pinNum.map((pin) => initPin(pin))
+	const [w, a, s, d] = pins
+	return {
+		w,
+		a,
+		s,
+		d,
 	}
+}
 
-	io.on('connection', (socket) => {
+const initBoard = (port: string) => new Board({ port: port })
+
+const initExpressServer = () => {
+	// init server
+	const app = express()
+	const httpServer = new HTTPServer(app)
+
+	// set file paths
+	const __dirname = path.dirname(fileURLToPath(import.meta.url))
+	const srcPath = path.join(__dirname, '../../client/src')
+	const scriptPath = path.join(__dirname, '../../client/dist')
+
+	// serve static files
+	app.use(express.static(srcPath))
+	app.use('/dist', express.static(scriptPath))
+
+	return httpServer
+}
+
+const initSocketIOServer = (httpServer: HTTPServer, pins: Pins) => {
+	const io = new SocketIOServer(httpServer)
+	io.on('connect', (socket) => {
 		console.log('Client connected.')
 
-		socket.on('key', ({ key, toggle }) => {
-			if (relays[key as Keys].isOn === toggle) return
-			toggle ? relays[key as Keys].close() : relays[key as Keys].open()
-			console.log(`${key}: ${toggle}`)
+		socket.on('key', (args: KeyMessage) => {
+			args.toggle ? pins[args.key].high() : pins[args.key].low()
 		})
 	})
-})
+}
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const srcPath = path.join(__dirname, '../../client/src')
-const scriptPath = path.join(__dirname, '../../client/dist')
+const runServer = (pinNums: PinNumbers, boardPort: string, serverPort: number) => {
+	const board = initBoard(boardPort)
 
-app.use(express.static(srcPath))
-app.use('/dist', express.static(scriptPath))
+	board.on('ready', () => {
+		const pins = initPins(pinNums)
+		console.log(`${board.id} ready: ${board.isReady}`)
 
-const PORT = 3000
-httpServer.listen(PORT, () => {
-	console.log(`Server listening on port ${PORT}`)
-})
+		const httpServer = initExpressServer()
+		httpServer.listen(serverPort, () => {
+			console.log(`Server listening on port ${serverPort}.`)
+		})
+
+		initSocketIOServer(httpServer, pins)
+	})
+}
+
+runServer(pinNumbers, boardPort, serverPort)
