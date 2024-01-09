@@ -1,15 +1,57 @@
-<!DOCTYPE html>
-<html lang="en" class="font-sans">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RC-FPV Control Panel</title>
-    <link href="/dist/output.css" rel="stylesheet">
-</head>
-<body class="bg-slate-500 font-sans">
-    <h1>RC-FPV Control Panel</h1>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz" crossorigin="anonymous"></script>
-    <script type="module" src="/dist/client.js"></script>
-</body>
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			http-equiv="X-UA-Compatible"
+			content="IE=edge" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0" />
+		<title>RC-FPV Control Panel</title>
+		<link
+			href="/dist/output.css"
+			rel="stylesheet" />
+	</head>
+	<body
+		class="flex h-screen w-screen flex-col place-items-center justify-end gap-2 overflow-hidden bg-gradient-to-b from-gray-900 to-slate-600 p-2 text-center font-sans text-lg leading-none text-white antialiased">
+		<video
+			id="video"
+			class="grow drop-shadow-lg"></video>
+		<section>
+			<button
+				id="w_button"
+				aria-pressed="false"
+				class="h-10 w-10 rounded-lg bg-slate-800 p-2.5 drop-shadow-md transition-transform aria-pressed:scale-[0.96] aria-pressed:mix-blend-color-dodge aria-pressed:drop-shadow">
+				W
+			</button>
+		</section>
+		<section class="flex gap-2">
+			<button
+				id="a_button"
+				aria-pressed="false"
+				class="h-10 w-10 rounded-lg bg-slate-800 p-2.5 drop-shadow-md transition-transform aria-pressed:scale-[0.96] aria-pressed:mix-blend-color-dodge aria-pressed:drop-shadow">
+				A
+			</button>
+			<button
+				id="s_button"
+				aria-pressed="false"
+				class="h-10 w-10 rounded-lg bg-slate-800 p-2.5 drop-shadow-md transition-transform aria-pressed:scale-[0.96] aria-pressed:mix-blend-color-dodge aria-pressed:drop-shadow">
+				S
+			</button>
+			<button
+				id="d_button"
+				aria-pressed="false"
+				class="h-10 w-10 rounded-lg bg-slate-800 p-2.5 drop-shadow-md transition-transform aria-pressed:scale-[0.96] aria-pressed:mix-blend-color-dodge aria-pressed:drop-shadow">
+				D
+			</button>
+		</section>
+		<script
+			src="https://cdn.socket.io/4.7.2/socket.io.min.js"
+			integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz"
+			crossorigin="anonymous"></script>
+		<script
+			type="module"
+			src="/dist/client.js"></script>
+	</body>
 </html>
