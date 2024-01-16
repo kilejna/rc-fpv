@@ -16,8 +16,8 @@ Support for gamepad controllers using the GamePad API will be added in the futur
 
 ### Hardware
 
-- Serial Device
-- Relays
+- Serial Device (Arduino)
+- Relay Board
 - RC Device
 - FPV Camera
 - Host Device
@@ -50,8 +50,32 @@ const serverConfiguration: ServerConfiguration = {
 	serverPort: 3000,
 }
 ```
+   #### (Skip this step if you have only one camera connected to your device)
+2. Edit clientConfiguration in `client.ts`:
 
-2. Install dependancies:
+   
+   In line 8, add or uncomment the code below;
+   
+```ts
+   console.log(navigator.mediaDevices.enumerateDevices())
+```
+   
+   Install dependancies, build and run the server. (Step 3,4,5)
+   
+   Check the console log for your cameras deviceId.
+   
+   Edit line 10-12 with the code below;
+
+```ts
+   .getUserMedia({ video: {
+		deviceId: 'YourDeviceIdGoesHere',
+			}})
+ ```
+
+   Continue following the next steps:
+
+
+3. Install dependancies:
 
 ```bash
 npm i
@@ -59,7 +83,7 @@ npm run install:server
 npm run install:client
 ```
 
-3. Build project:
+4. Build project:
 
 ```bash
 npm run build:server
@@ -67,7 +91,7 @@ npm run build:client
 npm run build:css
 ```
 
-4. Run server:
+5. Run server:
 
 ```bash
 npm run start:server
