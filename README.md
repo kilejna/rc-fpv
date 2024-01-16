@@ -59,7 +59,6 @@ const serverConfiguration: ServerConfiguration = {
 ```ts
    console.log(navigator.mediaDevices.enumerateDevices())
 ```
-   
    Install dependancies, build and run the server. (Step 3,4,5)
    
    Check the console log for your cameras deviceId.
@@ -70,9 +69,9 @@ const serverConfiguration: ServerConfiguration = {
    .getUserMedia({ video: {
 		deviceId: 'YourDeviceIdGoesHere',
 			}})
- ```
+```
 
-   Continue following the next steps:
+Continue following the next steps:
 
 
 3. Install dependancies:
@@ -96,6 +95,12 @@ npm run build:css
 ```bash
 npm run start:server
 ```
+
+6. Open this address in your browser:
+
+```
+http://localhost:3000/
+````
 
 ## License
 
