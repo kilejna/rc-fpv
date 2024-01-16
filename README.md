@@ -19,7 +19,7 @@ Support for gamepad controllers using the GamePad API will be added in the futur
 - Serial Device (Arduino)
 - Relay Board
 - RC Device
-- FPV Camera
+- FPV Camera (UVC/OTG)
 - Host Device
 - TBA...
 
