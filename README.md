@@ -50,6 +50,9 @@ const serverConfiguration: ServerConfiguration = {
 	serverPort: 3000,
 }
 ```
+
+ProTip: You can easily find your boardPort using the Arduino IDE
+
    #### (Skip this step if you have only one camera connected to your device)
 2. Edit clientConfiguration in `client.ts`:
 
@@ -112,4 +115,4 @@ For any additional information, feel free to contact us at [kilejna@hotmail.com]
 
 ## Acknowledgements
 
-- Any individuals, organisations and communities that contribute to the maintanence of libraries.
+Any individuals, organisations and communities that contribute to the maintanence of libraries.
