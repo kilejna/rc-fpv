@@ -51,7 +51,7 @@ const serverConfiguration: ServerConfiguration = {
 }
 ```
 
-ProTip: You can easily find your boardPort using the Arduino IDE
+ProTip: You can easily find your boardPort using the Arduino IDE or using "ls /dev/tty.*" if you're on OSX
 
    #### (Skip this step if you have only one camera connected to your device)
 2. Edit clientConfiguration in `client.ts`:
