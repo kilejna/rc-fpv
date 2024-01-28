@@ -70,7 +70,7 @@ const getStream = (videoDeviceID: ConstrainDOMString | undefined) => {
 document.addEventListener('DOMContentLoaded', () => {
 	getMediaDevices()
 	// connect to socket
-	//const socket = io('http://localhost:3000')
+	const socket = io('http://localhost:3000')
 	setTimeout(() => {
 		readSelectValue();
 	  }, 0);
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	// handle socket messages
 	const sendKeyState = (key: Keys, toggle: boolean) => {
 		const message: KeyMessage = { key, toggle }
-		//socket.emit('key', message)
+		socket.emit('key', message)
 	}
 
 	// toggle button logic
