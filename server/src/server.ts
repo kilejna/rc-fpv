@@ -5,6 +5,8 @@ import pkg from 'johnny-five'
 import path from 'path'
 import { Server as SocketIOServer } from 'socket.io'
 import { fileURLToPath } from 'url'
+//import serverConfiguration from '../../config.json' assert {type: json}
+//const { default: data } = await import('../../config.json', { assert: { type: "json" } });
 
 const { Board, Pin } = pkg
 
@@ -17,11 +19,12 @@ type Pins = {
 
 const serverConfiguration: ServerConfiguration = {
 	pinNumbers: [2, 3, 4, 5],
-	boardPort: '/dev/ttyACM0',
+	serialPort: '/dev/ttyACM0',
 	serverPort: 3000,
 }
 
-const { pinNumbers, boardPort, serverPort } = serverConfiguration
+//const { pinNumbers, serialPort, serverPort } = data as ServerConfiguration
+const { pinNumbers, serialPort, serverPort } = serverConfiguration
 
 const initPin = (pin: number) => new Pin(pin)
 
@@ -66,8 +69,13 @@ const initSocketIOServer = (httpServer: HTTPServer, pins: Pins) => {
 	})
 }
 
-const runServer = (pinNums: PinNumbers, boardPort: string, serverPort: number) => {
-	const board = initBoard(boardPort)
+const runServer = (pinNums: PinNumbers, serialPort: string, serverPort: number) => {
+	const httpServer = initExpressServer()
+		httpServer.listen(serverPort, () => {
+			console.log(`Server listening on port ${serverPort}.`)
+		})
+
+	const board = initBoard(serialPort)
 
 	board.on('ready', () => {
 		const pins = initPins(pinNums)
@@ -82,4 +90,4 @@ const runServer = (pinNums: PinNumbers, boardPort: string, serverPort: number) =
 	})
 }
 
-runServer(pinNumbers, boardPort, serverPort)
+runServer(pinNumbers, serialPort, serverPort)

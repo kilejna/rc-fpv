@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="m-0 p-0 h-full w-full overflow-hidden bg-gradient-to-b from-gray-900 to-slate-600">
 	<head>
 		<meta charset="UTF-8" />
 		<meta
@@ -13,8 +13,14 @@
 			href="/dist/output.css"
 			rel="stylesheet" />
 	</head>
-	<body
-		class="flex h-screen w-screen flex-col place-items-center justify-end gap-2 overflow-hidden bg-gradient-to-b from-gray-900 to-slate-600 p-2 text-center font-sans text-lg leading-none text-white antialiased">
+		<main class="m-2 flex h-full w-full leading-none text-white antialiased">
+		<section>
+			<label for="select-video-source">Choose a video source:</label><br/>
+			<select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" name="devices" id="devices">
+			</select>
+		</section>
+	<section
+		class="flex flex-col place-items-center justify-end gap-2 text-center font-sans text-lg grow">
 		<video
 			id="video"
 			class="grow drop-shadow-lg"></video>
@@ -53,5 +59,6 @@
 		<script
 			type="module"
 			src="/dist/client.js"></script>
-	</body>
+			</section>
+		</main>
 </html>

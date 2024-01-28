@@ -9,6 +9,6 @@ export type PinNumbers = [number, number, number, number]
 
 export type ServerConfiguration = {
 	pinNumbers: PinNumbers
-	boardPort: string
+	serialPort: string
 	serverPort: number
 }

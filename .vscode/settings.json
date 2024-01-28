@@ -1,0 +1,14 @@
+{
+	"prettier.useEditorConfig": true,
+	"prettier.configPath": ".prettierrc",
+	"prettier.prettierPath": "./node_modules/prettier",
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.organizeImports": "always"
+	},
+	"eslint.nodePath": "./node_modules",
+	"[shellscript]": {
+		"editor.defaultFormatter": "shakram02.bash-beautify"
+	}
+}
