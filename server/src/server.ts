@@ -6,7 +6,7 @@ import path from 'path'
 import { Server as SocketIOServer } from 'socket.io'
 import { fileURLToPath } from 'url'
 //import serverConfiguration from '../../config.json' assert {type: json}
-//const { default: data } = await import('../../config.json', { assert: { type: "json" } });
+const { default: data } = await import('../../config.json', { assert: { type: "json" } });
 
 const { Board, Pin } = pkg
 
@@ -17,14 +17,14 @@ type Pins = {
 	d: pkg.Pin
 }
 
-const serverConfiguration: ServerConfiguration = {
+/*const serverConfiguration: ServerConfiguration = {
 	pinNumbers: [2, 3, 4, 5],
 	serialPort: '/dev/ttyACM0',
 	serverPort: 3000,
-}
+}*/
 
-//const { pinNumbers, serialPort, serverPort } = data as ServerConfiguration
-const { pinNumbers, serialPort, serverPort } = serverConfiguration
+const { pinNumbers, serialPort, serverPort } = data as ServerConfiguration
+//const { pinNumbers, serialPort, serverPort } = data
 
 const initPin = (pin: number) => new Pin(pin)
 
