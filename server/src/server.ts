@@ -1,93 +1,72 @@
-import { KeyMessage, PinNumbers, ServerConfiguration } from '@types'
-import express from 'express'
-import { Server as HTTPServer } from 'http'
-import pkg from 'johnny-five'
-import path from 'path'
-import { Server as SocketIOServer } from 'socket.io'
-import { fileURLToPath } from 'url'
-//import serverConfiguration from '../../config.json' assert {type: json}
-const { default: data } = await import('../../config.json', { assert: { type: "json" } });
+import { KeyMessage, PinNumbers, ServerConfiguration } from '@types';
+import express from 'express';
+import { Server as HTTPServer } from 'http';
+import { Board, Pin } from 'johnny-five';
+import path from 'path';
+import { Server as SocketIOServer } from 'socket.io';
+import { fileURLToPath } from 'url';
 
-const { Board, Pin } = pkg
+const serverConfiguration: ServerConfiguration = {
+    pinNumbers: [2, 3, 4, 5],
+    serialPort: '/dev/ttyACM0',
+    serverPort: 3000,
+};
 
-type Pins = {
-	w: pkg.Pin
-	a: pkg.Pin
-	s: pkg.Pin
-	d: pkg.Pin
-}
+type Pins = Record<string, Pin>;
 
-/*const serverConfiguration: ServerConfiguration = {
-	pinNumbers: [2, 3, 4, 5],
-	serialPort: '/dev/ttyACM0',
-	serverPort: 3000,
-}*/
+const initPin = (pinNumber: number): Pin => new Pin(pinNumber);
 
-const { pinNumbers, serialPort, serverPort } = data as ServerConfiguration
-//const { pinNumbers, serialPort, serverPort } = data
+const initPins = (pinNumbers: PinNumbers): Pins => {
+    const pins: Partial<Pins> = {};
+    pinNumbers.forEach((pinNumber, index) => {
+        pins[serverConfiguration.pinNumbers[index]] = initPin(pinNumber);
+    });
+    return pins as Pins;
+};
 
-const initPin = (pin: number) => new Pin(pin)
+const initBoard = (port: string): Board => new Board({ port });
 
-const initPins = (pinNum: PinNumbers) => {
-	const pins = pinNum.map((pin) => initPin(pin))
-	const [w, a, s, d] = pins
-	return {
-		w,
-		a,
-		s,
-		d,
-	}
-}
+const initExpressServer = (): HTTPServer => {
+    const app = express();
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const srcPath = path.join(__dirname, '../../client/src');
+    const scriptPath = path.join(__dirname, '../../client/dist');
 
-const initBoard = (port: string) => new Board({ port: port })
+    app.use(express.static(srcPath));
+    app.use('/dist', express.static(scriptPath));
 
-const initExpressServer = () => {
-	// init server
-	const app = express()
-	const httpServer = new HTTPServer(app)
+    return new HTTPServer(app);
+};
 
-	// set file paths
-	const __dirname = path.dirname(fileURLToPath(import.meta.url))
-	const srcPath = path.join(__dirname, '../../client/src')
-	const scriptPath = path.join(__dirname, '../../client/dist')
+const initSocketIOServer = (httpServer: HTTPServer, pins: Pins): void => {
+    const io = new SocketIOServer(httpServer);
 
-	// serve static files
-	app.use(express.static(srcPath))
-	app.use('/dist', express.static(scriptPath))
+    io.on('connect', (socket) => {
+        console.log('Client connected.');
 
-	return httpServer
-}
+        socket.on('key', (message: KeyMessage) => {
+            const pin = pins[message.key];
+            if (pin) {
+                message.toggle ? pin.high() : pin.low();
+            }
+        });
+    });
+};
 
-const initSocketIOServer = (httpServer: HTTPServer, pins: Pins) => {
-	const io = new SocketIOServer(httpServer)
-	io.on('connect', (socket) => {
-		console.log('Client connected.')
+const runServer = (pinNumbers: PinNumbers, serialPort: string, serverPort: number): void => {
+    const board = initBoard(serialPort);
 
-		socket.on('key', (args: KeyMessage) => {
-			args.toggle ? pins[args.key].high() : pins[args.key].low()
-		})
-	})
-}
+    board.on('ready', () => {
+        const pins = initPins(pinNumbers);
+        console.log(`${board.id} ready: ${board.isReady}`);
 
-const runServer = (pinNums: PinNumbers, serialPort: string, serverPort: number) => {
-	const httpServer = initExpressServer()
-		httpServer.listen(serverPort, () => {
-			console.log(`Server listening on port ${serverPort}.`)
-		})
+        const httpServer = initExpressServer();
+        httpServer.listen(serverPort, () => {
+            console.log(`Server listening on port ${serverPort}.`);
+        });
 
-	const board = initBoard(serialPort)
+        initSocketIOServer(httpServer, pins);
+    });
+};
 
-	board.on('ready', () => {
-		const pins = initPins(pinNums)
-		console.log(`${board.id} ready: ${board.isReady}`)
-
-		const httpServer = initExpressServer()
-		httpServer.listen(serverPort, () => {
-			console.log(`Server listening on port ${serverPort}.`)
-		})
-
-		initSocketIOServer(httpServer, pins)
-	})
-}
-
-runServer(pinNumbers, serialPort, serverPort)
+runServer(serverConfiguration.pinNumbers, serverConfiguration.serialPort, serverConfiguration.serverPort);
