@@ -1,5 +1,7 @@
 <!doctype html>
-<html lang="en" class="m-0 p-0 h-full w-full overflow-hidden bg-gradient-to-b from-gray-900 to-slate-600">
+<html
+	lang="en"
+	class="m-0 h-full w-full overflow-hidden bg-gradient-to-b from-gray-900 to-slate-600 p-2">
 	<head>
 		<meta charset="UTF-8" />
 		<meta
@@ -13,45 +15,54 @@
 			href="/dist/output.css"
 			rel="stylesheet" />
 	</head>
-		<main class="m-2 flex h-full w-full leading-none text-white antialiased">
-		<section>
-			<label for="select-video-source">Choose a video source:</label><br/>
-			<select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" name="devices" id="devices">
-			</select>
-		</section>
-	<section
-		class="flex flex-col place-items-center justify-end gap-2 text-center font-sans text-lg grow">
-		<video
-			id="video"
-			class="grow drop-shadow-lg"></video>
-		<section>
-			<button
-				id="w_button"
-				aria-pressed="false"
-				class="h-10 w-10 rounded-lg bg-slate-800 p-2.5 drop-shadow-md transition-transform aria-pressed:scale-[0.96] aria-pressed:mix-blend-color-dodge aria-pressed:drop-shadow">
-				W
-			</button>
-		</section>
-		<section class="flex gap-2">
-			<button
-				id="a_button"
-				aria-pressed="false"
-				class="h-10 w-10 rounded-lg bg-slate-800 p-2.5 drop-shadow-md transition-transform aria-pressed:scale-[0.96] aria-pressed:mix-blend-color-dodge aria-pressed:drop-shadow">
-				A
-			</button>
-			<button
-				id="s_button"
-				aria-pressed="false"
-				class="h-10 w-10 rounded-lg bg-slate-800 p-2.5 drop-shadow-md transition-transform aria-pressed:scale-[0.96] aria-pressed:mix-blend-color-dodge aria-pressed:drop-shadow">
-				S
-			</button>
-			<button
-				id="d_button"
-				aria-pressed="false"
-				class="h-10 w-10 rounded-lg bg-slate-800 p-2.5 drop-shadow-md transition-transform aria-pressed:scale-[0.96] aria-pressed:mix-blend-color-dodge aria-pressed:drop-shadow">
-				D
-			</button>
-		</section>
+	<body class="flex h-full w-full gap-2 leading-none text-white antialiased">
+		<aside
+			id="select-video-source-container"
+			class="flex w-1/6 flex-initial flex-col gap-1">
+			<select
+				id="device-list"
+				name="device-list"
+				class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2 text-xs text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"></select>
+		</aside>
+		<main class="flex grow flex-col items-center justify-end gap-2 text-center font-sans text-lg leading-none">
+			<div
+				id="media-container"
+				class="flex aspect-auto h-[480px] w-[640px] grow items-center justify-center bg-black text-4xl font-bold text-white/80 drop-shadow-lg">
+				<video
+					id="video-container"
+					class="hidden"></video>
+			</div>
+			<nav
+				id="buttons"
+				class="flex flex-col items-center justify-center gap-2">
+				<button
+					id="w-button"
+					aria-pressed="false"
+					class="h-10 w-10 rounded-lg bg-slate-800 p-2.5 drop-shadow-md transition-transform hover:mix-blend-color-dodge aria-pressed:scale-[0.96] aria-pressed:mix-blend-color-dodge aria-pressed:drop-shadow">
+					W
+				</button>
+				<div class="flex gap-2">
+					<button
+						id="a-button"
+						aria-pressed="false"
+						class="h-10 w-10 rounded-lg bg-slate-800 p-2.5 drop-shadow-md transition-transform hover:mix-blend-color-dodge aria-pressed:scale-[0.96] aria-pressed:mix-blend-color-dodge aria-pressed:drop-shadow">
+						A
+					</button>
+					<button
+						id="s-button"
+						aria-pressed="false"
+						class="h-10 w-10 rounded-lg bg-slate-800 p-2.5 drop-shadow-md transition-transform hover:mix-blend-color-dodge aria-pressed:scale-[0.96] aria-pressed:mix-blend-color-dodge aria-pressed:drop-shadow">
+						S
+					</button>
+					<button
+						id="d-button"
+						aria-pressed="false"
+						class="h-10 w-10 rounded-lg bg-slate-800 p-2.5 drop-shadow-md transition-transform hover:mix-blend-color-dodge aria-pressed:scale-[0.96] aria-pressed:mix-blend-color-dodge aria-pressed:drop-shadow">
+						D
+					</button>
+				</div>
+			</nav>
+		</main>
 		<script
 			src="https://cdn.socket.io/4.7.2/socket.io.min.js"
 			integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz"
@@ -59,6 +70,5 @@
 		<script
 			type="module"
 			src="/dist/client.js"></script>
-			</section>
-		</main>
+	</body>
 </html>
