@@ -1,85 +1,72 @@
-import { KeyMessage, PinNumbers, ServerConfiguration } from '@types'
-import express from 'express'
-import { Server as HTTPServer } from 'http'
-import pkg from 'johnny-five'
-import path from 'path'
-import { Server as SocketIOServer } from 'socket.io'
-import { fileURLToPath } from 'url'
-
-const { Board, Pin } = pkg
-
-type Pins = {
-	w: pkg.Pin
-	a: pkg.Pin
-	s: pkg.Pin
-	d: pkg.Pin
-}
+import { KeyMessage, PinNumbers, ServerConfiguration } from '@types';
+import express from 'express';
+import { Server as HTTPServer } from 'http';
+import { Board, Pin } from 'johnny-five';
+import path from 'path';
+import { Server as SocketIOServer } from 'socket.io';
+import { fileURLToPath } from 'url';
 
 const serverConfiguration: ServerConfiguration = {
-	pinNumbers: [2, 3, 4, 5],
-	boardPort: '/dev/ttyACM0',
-	serverPort: 3000,
-}
+    pinNumbers: [2, 3, 4, 5],
+    serialPort: '/dev/ttyACM0',
+    serverPort: 3000,
+};
 
-const { pinNumbers, boardPort, serverPort } = serverConfiguration
+type Pins = Record<string, Pin>;
 
-const initPin = (pin: number) => new Pin(pin)
+const initPin = (pinNumber: number): Pin => new Pin(pinNumber);
 
-const initPins = (pinNum: PinNumbers) => {
-	const pins = pinNum.map((pin) => initPin(pin))
-	const [w, a, s, d] = pins
-	return {
-		w,
-		a,
-		s,
-		d,
-	}
-}
+const initPins = (pinNumbers: PinNumbers): Pins => {
+    const pins: Partial<Pins> = {};
+    pinNumbers.forEach((pinNumber, index) => {
+        pins[serverConfiguration.pinNumbers[index]] = initPin(pinNumber);
+    });
+    return pins as Pins;
+};
 
-const initBoard = (port: string) => new Board({ port: port })
+const initBoard = (port: string): Board => new Board({ port });
 
-const initExpressServer = () => {
-	// init server
-	const app = express()
-	const httpServer = new HTTPServer(app)
+const initExpressServer = (): HTTPServer => {
+    const app = express();
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const srcPath = path.join(__dirname, '../../client/src');
+    const scriptPath = path.join(__dirname, '../../client/dist');
 
-	// set file paths
-	const __dirname = path.dirname(fileURLToPath(import.meta.url))
-	const srcPath = path.join(__dirname, '../../client/src')
-	const scriptPath = path.join(__dirname, '../../client/dist')
+    app.use(express.static(srcPath));
+    app.use('/dist', express.static(scriptPath));
 
-	// serve static files
-	app.use(express.static(srcPath))
-	app.use('/dist', express.static(scriptPath))
+    return new HTTPServer(app);
+};
 
-	return httpServer
-}
+const initSocketIOServer = (httpServer: HTTPServer, pins: Pins): void => {
+    const io = new SocketIOServer(httpServer);
 
-const initSocketIOServer = (httpServer: HTTPServer, pins: Pins) => {
-	const io = new SocketIOServer(httpServer)
-	io.on('connect', (socket) => {
-		console.log('Client connected.')
+    io.on('connect', (socket) => {
+        console.log('Client connected.');
 
-		socket.on('key', (args: KeyMessage) => {
-			args.toggle ? pins[args.key].high() : pins[args.key].low()
-		})
-	})
-}
+        socket.on('key', (message: KeyMessage) => {
+            const pin = pins[message.key];
+            if (pin) {
+                message.toggle ? pin.high() : pin.low();
+            }
+        });
+    });
+};
 
-const runServer = (pinNums: PinNumbers, boardPort: string, serverPort: number) => {
-	const board = initBoard(boardPort)
+const runServer = (pinNumbers: PinNumbers, serialPort: string, serverPort: number): void => {
+    const board = initBoard(serialPort);
 
-	board.on('ready', () => {
-		const pins = initPins(pinNums)
-		console.log(`${board.id} ready: ${board.isReady}`)
+    board.on('ready', () => {
+        const pins = initPins(pinNumbers);
+        console.log(`${board.id} ready: ${board.isReady}`);
 
-		const httpServer = initExpressServer()
-		httpServer.listen(serverPort, () => {
-			console.log(`Server listening on port ${serverPort}.`)
-		})
+        const httpServer = initExpressServer();
+        httpServer.listen(serverPort, () => {
+            console.log(`Server listening on port ${serverPort}.`);
+        });
 
-		initSocketIOServer(httpServer, pins)
-	})
-}
+        initSocketIOServer(httpServer, pins);
+    });
+};
 
-runServer(pinNumbers, boardPort, serverPort)
+runServer(serverConfiguration.pinNumbers, serverConfiguration.serialPort, serverConfiguration.serverPort);

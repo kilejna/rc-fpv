@@ -1,83 +1,117 @@
 import { KeyMessage, Keys } from '@types'
+
 declare const io: any // eslint-disable-line @typescript-eslint/no-explicit-any
 
-const getStream = () => {
-	const video: HTMLVideoElement | null = document.querySelector('#video')
+type VideoDevices = {
+	value: string
+	text: string
+	selected?: boolean
+}
 
-	if (navigator.mediaDevices.getUserMedia && video) {
-		navigator.mediaDevices
-			.getUserMedia({ video: true })
-			.then((mediaStream) => {
-				video.srcObject = mediaStream
-				video.onloadedmetadata = () => {
-					video.play()
-				}
-			})
-			.catch((err) => {
-				console.error(`${err.name}: ${err.message}`)
-			})
+const video = document.getElementById('video-container') as HTMLVideoElement // get video element
+const deviceSelector = document.getElementById('device-list') as HTMLSelectElement // get device selector element
+const mediaContainer = document.getElementById('media-container') as HTMLElement // get media container element
+const socket = io('http://localhost:3000') // init socket
+
+// stream selected video device
+const getStream = async (videoDeviceID: ConstrainDOMString | undefined) => {
+	if (!video) return // if no video element, return
+
+	if (videoDeviceID && videoDeviceID !== 'default') {
+		try {
+			// get video device
+			const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: videoDeviceID, height: 480, width: 640 } })
+			// populate video element
+			video.srcObject = mediaStream
+			video.className = 'object-contain'
+			// stream video
+			video.onloadedmetadata = () => video.play()
+			// append video element if no video element exists in the media container
+			if (!mediaContainer.contains(video)) {
+				mediaContainer.appendChild(video)
+			}
+		} catch (error) {
+			handleError(error)
+		}
+	} else {
+		video.className = 'hidden'
 	}
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-	// connect to socket
-	const socket = io('http://localhost:3000')
+// get list of video devices
+const getDeviceList = async (): Promise<VideoDevices[]> => {
+	try {
+		await navigator.mediaDevices.getUserMedia({ video: true })
+		const devices = await navigator.mediaDevices.enumerateDevices() // get all connected media
+		const videoDevices = devices.filter((device) => device.kind === 'videoinput') // filter connected devices for video only
 
-	// get webcam
-	getStream()
+		return videoDevices.length === 0
+			? [{ value: 'null', text: '-- No Video Source Found --', selected: true }]
+			: [
+					{ value: 'default', text: '-- Select Video Source --', selected: true },
+					...videoDevices.map((device, index) => ({ value: device.deviceId, text: device.label || `Video Device ${index + 1}` })),
+				]
+	} catch (error) {
+		handleError(error)
+		return [{ value: 'null', text: '-- No Video Source Found --', selected: true }]
+	}
+}
 
-	// handle socket messages
-	const sendKeyState = (key: Keys, toggle: boolean) => {
-		const message: KeyMessage = { key, toggle }
-		socket.emit('key', message)
+// populate the device selector
+const populateOptions = (deviceList: VideoDevices[]) => {
+	if (!deviceSelector) return
+	deviceSelector.innerHTML = ''
+	deviceList.forEach((device) => {
+		const option = new Option(device.text, device.value, device.selected, device.selected)
+		deviceSelector.add(option)
+	})
+}
+
+const sendKeyState = (key: Keys, toggle: boolean) => {
+	const message: KeyMessage = { key, toggle }
+	socket.emit('key', message)
+}
+
+const toggleButton = (key: Keys, toggle: boolean) => {
+	const button = document.getElementById(`${key}-button`)
+	if (!button) return
+
+	button.setAttribute('aria-pressed', `${toggle}`)
+	sendKeyState(key, toggle)
+}
+
+const handleError = (error: unknown) => {
+	if (error instanceof Error) {
+		console.error(`${error.name}: ${error.message}`)
+	} else {
+		console.error('An unknown error occurred')
+	}
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+	try {
+		const devices = await getDeviceList()
+		populateOptions(devices)
+
+		deviceSelector.addEventListener('change', (event) => {
+			const videoId = (event.target as HTMLSelectElement).value
+			getStream(videoId)
+		})
+	} catch (error) {
+		handleError(error)
 	}
 
-	// toggle button logic
-	const toggleButton = (key: Keys, toggle: boolean) => {
-		const button = document.getElementById(`${key}_button`)
-		if (!button) return
-
-		// onKeyUp, toggle off
-		if (!toggle) {
-			button.setAttribute('aria-pressed', 'false')
-			sendKeyState(key, false)
-			return
-		}
-
-		// define key conflicts
-		const conflicts = { w: 's', s: 'w', a: 'd', d: 'a' } // w != s || a != d
-		const conflict = conflicts[key]
-		const conflictButton = conflict ? document.getElementById(`${conflict}_button`) : null
-
-		// onKeydown, check conflicts
-		if (conflictButton && conflictButton.getAttribute('aria-pressed') === 'true') return
-
-		// toggle on if no conflicts
-		button.setAttribute('aria-pressed', 'true')
-		sendKeyState(key, true)
-	}
-
-	// keydown listener
 	document.addEventListener('keydown', (event: KeyboardEvent) => {
-		const key = event.key.toLowerCase()
-		switch (key) {
-			case 'w':
-			case 's':
-			case 'a':
-			case 'd':
-				toggleButton(key, true)
+		const key = event.key.toLowerCase() as Keys
+		if (['w', 's', 'a', 'd'].includes(key)) {
+			toggleButton(key, true)
 		}
 	})
 
-	// keyup listener
 	document.addEventListener('keyup', (event: KeyboardEvent) => {
-		const key = event.key.toLowerCase()
-		switch (key) {
-			case 'w':
-			case 's':
-			case 'a':
-			case 'd':
-				toggleButton(key, false)
+		const key = event.key.toLowerCase() as Keys
+		if (['w', 's', 'a', 'd'].includes(key)) {
+			toggleButton(key, false)
 		}
 	})
 })
