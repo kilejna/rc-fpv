@@ -1,72 +1,74 @@
-import { KeyMessage, PinNumbers, ServerConfiguration } from '@types';
-import express from 'express';
-import { Server as HTTPServer } from 'http';
-import { Board, Pin } from 'johnny-five';
-import path from 'path';
-import { Server as SocketIOServer } from 'socket.io';
-import { fileURLToPath } from 'url';
+import { KeyMessage, PinNumbers, ServerConfiguration } from '@types'
+import express from 'express'
+import { Server as HTTPServer } from 'http'
+import path from 'path'
+import { Server as SocketIOServer } from 'socket.io'
+import { fileURLToPath } from 'url'
+// johnny-five default export
+import pkg from 'johnny-five'
+const { Board, Pin } = pkg
 
 const serverConfiguration: ServerConfiguration = {
-    pinNumbers: [2, 3, 4, 5],
-    serialPort: '/dev/ttyACM0',
-    serverPort: 3000,
-};
+	pinNumbers: [2, 3, 4, 5],
+	serialPort: '/dev/ttyACM0',
+	serverPort: 3000,
+}
 
-type Pins = Record<string, Pin>;
+type Pins = Record<string, InstanceType<typeof Pin>>
 
-const initPin = (pinNumber: number): Pin => new Pin(pinNumber);
+const initPin = (pinNumber: number): InstanceType<typeof Pin> => new Pin(pinNumber)
 
-const initPins = (pinNumbers: PinNumbers): Pins => {
-    const pins: Partial<Pins> = {};
-    pinNumbers.forEach((pinNumber, index) => {
-        pins[serverConfiguration.pinNumbers[index]] = initPin(pinNumber);
-    });
-    return pins as Pins;
-};
+const initPins = (pinNumbers: PinNumbers) => {
+	const pins: Partial<Pins> = {}
+	pinNumbers.forEach((pinNumber, index) => {
+		pins[serverConfiguration.pinNumbers[index]] = initPin(pinNumber)
+	})
+	return pins
+}
 
-const initBoard = (port: string): Board => new Board({ port });
+const initBoard = (port: string): InstanceType<typeof Board> => new Board({ port })
 
 const initExpressServer = (): HTTPServer => {
-    const app = express();
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const srcPath = path.join(__dirname, '../../client/src');
-    const scriptPath = path.join(__dirname, '../../client/dist');
+	const app = express()
+	const __dirname = path.dirname(fileURLToPath(import.meta.url))
+	const srcPath = path.join(__dirname, '../../client/src')
+	const scriptPath = path.join(__dirname, '../../client/dist')
 
-    app.use(express.static(srcPath));
-    app.use('/dist', express.static(scriptPath));
+	app.use(express.static(srcPath))
+	app.use('/dist', express.static(scriptPath))
 
-    return new HTTPServer(app);
-};
+	return new HTTPServer(app)
+}
 
 const initSocketIOServer = (httpServer: HTTPServer, pins: Pins): void => {
-    const io = new SocketIOServer(httpServer);
+	const io = new SocketIOServer(httpServer)
 
-    io.on('connect', (socket) => {
-        console.log('Client connected.');
+	io.on('connect', (socket) => {
+		console.log('Client connected.')
 
-        socket.on('key', (message: KeyMessage) => {
-            const pin = pins[message.key];
-            if (pin) {
-                message.toggle ? pin.high() : pin.low();
-            }
-        });
-    });
-};
+		socket.on('key', (message: KeyMessage) => {
+			const pin = pins[message.key]
+			if (pin) {
+				message.toggle ? pin.high() : pin.low()
+			}
+		})
+	})
+}
 
 const runServer = (pinNumbers: PinNumbers, serialPort: string, serverPort: number): void => {
-    const board = initBoard(serialPort);
+	const board = initBoard(serialPort)
 
-    board.on('ready', () => {
-        const pins = initPins(pinNumbers);
-        console.log(`${board.id} ready: ${board.isReady}`);
+	board.on('ready', () => {
+		const pins = initPins(pinNumbers)
+		console.log(`${board.id} ready: ${board.isReady}`)
 
-        const httpServer = initExpressServer();
-        httpServer.listen(serverPort, () => {
-            console.log(`Server listening on port ${serverPort}.`);
-        });
+		const httpServer = initExpressServer()
+		httpServer.listen(serverPort, () => {
+			console.log(`Server listening on port ${serverPort}.`)
+		})
 
-        initSocketIOServer(httpServer, pins);
-    });
-};
+		initSocketIOServer(httpServer, pins)
+	})
+}
 
-runServer(serverConfiguration.pinNumbers, serverConfiguration.serialPort, serverConfiguration.serverPort);
+runServer(serverConfiguration.pinNumbers, serverConfiguration.serialPort, serverConfiguration.serverPort)
