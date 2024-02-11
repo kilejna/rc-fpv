@@ -10,7 +10,7 @@ const { Board, Pin } = pkg
 
 const serverConfiguration: ServerConfiguration = {
 	pinNumbers: [2, 3, 4, 5],
-	serialPort: '/dev/ttyACM0',
+	serialPort: '/dev/ttyACM1',
 	serverPort: 3000,
 }
 
@@ -20,8 +20,10 @@ const initPin = (pinNumber: number): InstanceType<typeof Pin> => new Pin(pinNumb
 
 const initPins = (pinNumbers: PinNumbers) => {
 	const pins: Partial<Pins> = {}
+	const keys = ['w', 'a', 's', 'd']
+	// map keys (direction) to pin number
 	pinNumbers.forEach((pinNumber, index) => {
-		pins[serverConfiguration.pinNumbers[index]] = initPin(pinNumber)
+		pins[keys[index]] = initPin(pinNumber)
 	})
 	return pins
 }
