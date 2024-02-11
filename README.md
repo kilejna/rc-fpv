@@ -41,8 +41,9 @@ Support for gamepad controllers using the GamePad API will be added in the futur
 
 ## Installation
 
-1. Edit serverConfiguration in `server.ts`:
-
+1. Change BoardPort in `server.ts` to your COM or Board Port
+   
+	ProTip: You can easily find your boardPort using the Arduino IDE or using "ls /dev/tty.*" if you're on OSX
 ```ts
 const serverConfiguration: ServerConfiguration = {
 	pinNumbers: [2, 3, 4, 5],
@@ -51,33 +52,7 @@ const serverConfiguration: ServerConfiguration = {
 }
 ```
 
-ProTip: You can easily find your boardPort using the Arduino IDE or using "ls /dev/tty.*" if you're on OSX
-
-   #### (Skip this step if you have only one camera connected to your device)
-2. Edit clientConfiguration in `client.ts`:
-
-   
-   In line 8, add or uncomment the code below;
-   
-```ts
-   console.log(navigator.mediaDevices.enumerateDevices())
-```
-   Install dependancies, build and run the server. (Step 3,4,5)
-   
-   Check the console log for your cameras deviceId.
-   
-   Edit line 10-12 with the code below;
-
-```ts
-   .getUserMedia({ video: {
-		deviceId: 'YourDeviceIdGoesHere',
-			}})
-```
-
-Continue following the next steps:
-
-
-3. Install dependancies:
+2. Install dependancies:
 
 ```bash
 npm i
@@ -85,7 +60,7 @@ npm run install:server
 npm run install:client
 ```
 
-4. Build project:
+3. Build project:
 
 ```bash
 npm run build:server
