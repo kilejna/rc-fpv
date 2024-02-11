@@ -1,4 +1,4 @@
-# RC-FPV Project
+# RC-FPV Project   ![favicon-32x32](https://github.com/kilejna/rc-fpv/assets/60970177/4f5c35b9-8a59-4470-a43e-a4978d5aa47f)
 
 ## Description
 
