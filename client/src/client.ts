@@ -74,7 +74,10 @@ const sendKeyState = (key: Keys, toggle: boolean) => {
 
 const toggleButton = (key: Keys, toggle: boolean) => {
 	const button = document.getElementById(`${key}-button`)
-	if (!button) return
+	const oppositeKey = { w: 's', a: 'd', s: 'w', d: 'a' }[key]
+	const oppositeButton = document.getElementById(`${oppositeKey}-button`)
+
+	if (!button || oppositeButton?.getAttribute('aria-pressed') === 'true') return
 
 	button.setAttribute('aria-pressed', `${toggle}`)
 	sendKeyState(key, toggle)
