@@ -1,4 +1,4 @@
-import { KeyMessage, PinNumbers, ServerConfiguration } from '@types'
+import { KeyMessage, PinNumbers, Pins, ServerConfiguration } from '@types'
 import express from 'express'
 import { Server as HTTPServer } from 'http'
 import path from 'path'
@@ -10,11 +10,9 @@ const { Board, Pin } = pkg
 
 const serverConfiguration: ServerConfiguration = {
 	pinNumbers: [2, 3, 4, 5],
-	serialPort: '/dev/ttyACM1',
+	serialPort: '/dev/ttyACM0',
 	serverPort: 3000,
 }
-
-type Pins = Record<string, InstanceType<typeof Pin>>
 
 const initPin = (pinNumber: number): InstanceType<typeof Pin> => new Pin(pinNumber)
 

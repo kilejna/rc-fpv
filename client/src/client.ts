@@ -1,70 +1,55 @@
-import { KeyMessage, Keys } from '@types'
+import { KeyMessage, Keys, VideoDevice } from '@types'
+import { io as IO } from 'socket.io-client'
 
-declare const io: any // eslint-disable-line @typescript-eslint/no-explicit-any
+declare const io: typeof IO
 
-type VideoDevices = {
-	value: string
-	text: string
-	selected?: boolean
-}
+const video = document.getElementById('video-container') as HTMLVideoElement // video element
+const deviceSelector = document.getElementById('device-list') as HTMLSelectElement // select elemnet
+const mediaContainer = document.getElementById('media-container') as HTMLElement // media container element
+const socket = io('http://localhost:3000')
 
-const video = document.getElementById('video-container') as HTMLVideoElement // get video element
-const deviceSelector = document.getElementById('device-list') as HTMLSelectElement // get device selector element
-const mediaContainer = document.getElementById('media-container') as HTMLElement // get media container element
-const socket = io('http://localhost:3000') // init socket
-
-// stream selected video device
-const getStream = async (videoDeviceID: ConstrainDOMString | undefined) => {
-	if (!video) return // if no video element, return
-
-	if (videoDeviceID && videoDeviceID !== 'default') {
-		try {
-			// get video device
-			const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: videoDeviceID, height: 480, width: 640 } })
-			// populate video element
-			video.srcObject = mediaStream
-			video.className = 'object-contain'
-			// stream video
-			video.onloadedmetadata = () => video.play()
-			// append video element if no video element exists in the media container
-			if (!mediaContainer.contains(video)) {
-				mediaContainer.appendChild(video)
-			}
-		} catch (error) {
-			handleError(error)
-		}
-	} else {
+const getStream = async (videoDeviceID: string | undefined) => {
+	if (!video || videoDeviceID === 'default') {
 		video.className = 'hidden'
+		return
+	}
+
+	try {
+		const mediaStream = await navigator.mediaDevices.getUserMedia({
+			video: { deviceId: videoDeviceID, height: 480, width: 640 },
+		})
+		video.srcObject = mediaStream
+		video.className = 'object-contain'
+		video.onloadedmetadata = () => video.play()
+		if (!mediaContainer.contains(video)) {
+			mediaContainer.appendChild(video)
+		}
+	} catch (error) {
+		handleError(error)
 	}
 }
 
-// get list of video devices
-const getDeviceList = async (): Promise<VideoDevices[]> => {
+const getDeviceList = async (): Promise<VideoDevice[]> => {
 	try {
 		await navigator.mediaDevices.getUserMedia({ video: true })
-		const devices = await navigator.mediaDevices.enumerateDevices() // get all connected media
-		const videoDevices = devices.filter((device) => device.kind === 'videoinput') // filter connected devices for video only
+		const devices: MediaDeviceInfo[] = await navigator.mediaDevices.enumerateDevices()
+		const videoDevices: MediaDeviceInfo[] = devices.filter((device: MediaDeviceInfo) => device.kind === 'videoinput')
 
-		return videoDevices.length === 0
-			? [{ value: 'null', text: '-- No Video Source Found --', selected: true }]
-			: [
-					{ value: 'default', text: '-- Select Video Source --', selected: true },
-					...videoDevices.map((device, index) => ({ value: device.deviceId, text: device.label || `Video Device ${index + 1}` })),
-				]
+		return videoDevices.map((device: MediaDeviceInfo, index: number) => ({
+			value: device.deviceId,
+			text: device.label || `Video Device ${index + 1}`,
+		}))
 	} catch (error) {
 		handleError(error)
 		return [{ value: 'null', text: '-- No Video Source Found --', selected: true }]
 	}
 }
 
-// populate the device selector
-const populateOptions = (deviceList: VideoDevices[]) => {
-	if (!deviceSelector) return
-	deviceSelector.innerHTML = ''
-	deviceList.forEach((device) => {
-		const option = new Option(device.text, device.value, device.selected, device.selected)
-		deviceSelector.add(option)
-	})
+const populateOptions = (deviceList: VideoDevice[]) => {
+	deviceSelector.innerHTML = deviceList.reduce(
+		(acc: string, device: VideoDevice) => acc + `<option value="${device.value}" ${device.selected ? 'selected' : ''}>${device.text}</option>`,
+		''
+	)
 }
 
 const sendKeyState = (key: Keys, toggle: boolean) => {
@@ -73,9 +58,9 @@ const sendKeyState = (key: Keys, toggle: boolean) => {
 }
 
 const toggleButton = (key: Keys, toggle: boolean) => {
-	const button = document.getElementById(`${key}-button`)
-	const oppositeKey = { w: 's', a: 'd', s: 'w', d: 'a' }[key]
-	const oppositeButton = document.getElementById(`${oppositeKey}-button`)
+	const button: HTMLElement | null = document.getElementById(`${key}-button`)
+	const oppositeKey: string = { w: 's', a: 'd', s: 'w', d: 'a' }[key]
+	const oppositeButton: HTMLElement | null = document.getElementById(`${oppositeKey}-button`)
 
 	if (!button || oppositeButton?.getAttribute('aria-pressed') === 'true') return
 
@@ -92,29 +77,21 @@ const handleError = (error: unknown) => {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-	try {
-		const devices = await getDeviceList()
-		populateOptions(devices)
+	const devices: VideoDevice[] = await getDeviceList()
+	populateOptions([{ value: 'default', text: '-- Select Video Source --', selected: true }, ...devices])
 
-		deviceSelector.addEventListener('change', (event) => {
-			const videoId = (event.target as HTMLSelectElement).value
-			getStream(videoId)
-		})
-	} catch (error) {
-		handleError(error)
+	deviceSelector.addEventListener('change', (event: Event) => {
+		const videoId: string = (event.target as HTMLSelectElement).value
+		getStream(videoId)
+	})
+
+	const keyEvent = (event: KeyboardEvent, toggle: boolean) => {
+		const key = event.key.toLowerCase() as Keys
+		if (['w', 's', 'a', 'd'].includes(key)) {
+			toggleButton(key, toggle)
+		}
 	}
 
-	document.addEventListener('keydown', (event: KeyboardEvent) => {
-		const key = event.key.toLowerCase() as Keys
-		if (['w', 's', 'a', 'd'].includes(key)) {
-			toggleButton(key, true)
-		}
-	})
-
-	document.addEventListener('keyup', (event: KeyboardEvent) => {
-		const key = event.key.toLowerCase() as Keys
-		if (['w', 's', 'a', 'd'].includes(key)) {
-			toggleButton(key, false)
-		}
-	})
+	document.addEventListener('keydown', (event: KeyboardEvent) => keyEvent(event, true))
+	document.addEventListener('keyup', (event: KeyboardEvent) => keyEvent(event, false))
 })
